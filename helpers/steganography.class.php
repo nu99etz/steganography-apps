@@ -11,13 +11,6 @@ class Steganography extends Converter {
     $msgBin = static::toBin($messages);
     $msgLength = strlen($msgBin);
 
-    //if($files[''])
-
-    // echo "<pre>";
-    // print_r($files);
-    // echo "</pre>";
-    // die();
-
     if($files['type'] == "image/jpeg") {
       $img = imagecreatefromjpeg('../upload/'.$files['file_name']);
     } else if($files['type'] == "image/png") {
@@ -114,23 +107,21 @@ class Steganography extends Converter {
 
       $blue = static::toBin($b);
 
-      $real_message .= $blue[strlen($blue) - 1]; //Ad the lsb to our binary result
+      $real_message .= $blue[strlen($blue) - 1];
 
-      $count++; //Coun that a digit was added
+      $count++;
 
-      if ($count == 8) { //Every time we hit 8 new digits, check the value
-          if (static::toString(substr($real_message, -8)) === '|') { //Whats the value of the last 8 digits?
-              $real_message = static::toString(substr($real_message,0,-8)); //convert to string and remove /
+      if ($count == 8) {
+          if (static::toString(substr($real_message, -8)) === '|') {
+              $real_message = static::toString(substr($real_message,0,-8));
               Route::redirect('success','Hasil Dekripsi Gambar : '.$real_message,Route::selfPage());
           }
-          $count = 0; //Reset counter
+          $count = 0;
       }
 
-      $pixelX++; //Change x coordinates to next
+      $pixelX++;
+    }
   }
 }
-}
-
-
 
  ?>

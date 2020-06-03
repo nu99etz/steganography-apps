@@ -15,7 +15,7 @@ $permit["can.$custom_name"];
 // Aksi
 if(isset($_POST["$custom_name"])) {
   if(!empty($_FILES['foto']) && !empty($_POST['messages'])) {
-      $upload = Image::getUploadImage($_FILES['foto']);
+      $upload = Image::getUploadImage($_FILES['foto'],null,'5097152');
       if($upload['u_success']) {
         //Check::debug_array($upload);
         Steganography::getEncrypt($upload,$_POST['messages']);

@@ -89,12 +89,18 @@ include('../common/action.php');
             <?php  } else if($value['input'] == 'file') {
               ?>
                     <div class="custom-file">
-                      <input type="<?php echo $value['input'];?>" class="custom-file-input" id="customFile"  name="<?php echo $value['name'];?>" onchange="preview(this,'gambar')">
+                      <input type="<?php echo $value['input'];?>" class="custom-file-input" id="customFile"  name="<?php echo $value['name'];?>" onchange="renderImg(this)">
                       <label class="custom-file-label" for="customFile"><?php echo $value['label'];?></label>
                     </div>
 
-                    <div class="form-group">
-                        <img src="<?php echo '../../'.Route::getUploadPath('users',$value['value']);?>" width = "250" class="rendered img-fluid mt-2" id="gambar" alt=""/>
+                    <div class="form-group" align = "center">
+                    <?php if(!empty($value['value'])) {
+                      ?>
+                      <img src="<?php echo '../../'.Route::getUploadPath('users',$value['value']);?>" width = "500" class="rendered img-fluid mt-2" alt=""/>
+                    <?php } else {
+                      ?>
+                        <img src="" width = "500" class="rendered img-fluid mt-2" alt=""/>
+                    <?php } ?>
                     </div>
           <?php  }else if($value['input'] == 'textarea') {
             ?>
@@ -168,26 +174,18 @@ require_once(Page::usePartial('script'));
  ?>
 <script type="text/javascript" charset="utf-8">
 
-function preview(gambar,idpreview){
-      var gb = gambar.files;
-            for (var i = -1; i < gb.length; i++){
-                var gbPreview = gb[i];
-                var imageType = /image.*/;
-                var preview=document.getElementById(idpreview);
-                var reader = new FileReader();
-                    if (gbPreview.type.match(imageType)) {
-                        preview.file = gbPreview;
-                        reader.onload = (function(element) {
-                            return function(e) {
-                                element.src = e.target.result;
-                            };
-                        })(preview);
-                        reader.readAsDataURL(gbPreview);
-                    } else{
-                        alert("Type file tidak sesuai. Khusus image.");
-                    }
-                }
-            }
+
+  function renderImg(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        $('.rendered').attr('src', e.target.result);
+      }
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 
  $(document).ready(function () {
 
@@ -251,7 +249,12 @@ function preview(gambar,idpreview){
          message : "<?php echo $custom_message; ?>",
          buttons : {
            confirm : {
-             label : 'Simpan',
+             <?php if(!empty($custom_name)) {
+               $label = $custom_name;
+             } else {
+               $label = 'Simpan';
+             } ?>
+             label : "<?php echo $label;?>",
              className : 'btn-primary'
            },
            cancel : {
