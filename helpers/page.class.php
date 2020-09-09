@@ -2,6 +2,38 @@
 
 class Page {
 
+    /**
+    * Mendapatkan content
+    *
+    **/
+    public static function getContent() {
+      global $content;
+
+      $contents = ob_get_contents();
+      if(empty($content) or strlen($contents) > 0)
+        $content[] = $contents;
+
+      ob_clean();
+    }
+
+    public static function useLayout($layout) {
+      global $layouts;
+
+      self::getContent();
+
+      $layouts = $layout;
+    }
+
+    public static function buildLayout() {
+
+      global $content,$layouts,$p_title,$p_act,$p_col,$p_namepage,$a_coloumn,$a_form;
+
+      if(!empty($layouts)) {
+        self::getContent();
+        include(Route::getViewPath('layout/'.$layouts));
+      }
+    }
+
     public static function usePage($name = null) {
 
       if($name == null) {
@@ -12,9 +44,9 @@ class Page {
       return $path;
     }
 
-    public static function useLayout($name) {
-      return $name.'.php';
-    }
+    // public static function useLayout($name) {
+    //   return $name.'.php';
+    // }
 
     public static function getLayout($name) {
 
@@ -34,12 +66,33 @@ class Page {
 
     }
 
-    public static function pageInsert($record,$model) {
+    // public static function getDetailColumn($column) {
+    //
+    // }
 
-      $add = $model::recInsert($model::fillable,$record);
-      if($add) {
+    public static function getPostDetail($column,$post) {
+
+      $record = array();
+      foreach($column as $key => $value) {
+        if($value['input'] == 'file') {
+          if(empty($_FILES[$value['name']]['error']))
+            $spost = $_FILES[$value['name']]['name'];
+        } else {
+          $spost = trim($post[$value['name']]);
+          $spost = (String) $spost;
+        }
+        $record[end(explode('.',$value['name']))] = $spost;
+      }
+
+      return $record;
+    }
+
+    public static function pageInsert($model,$record) {
+
+      $add = $model::recInsert($record);
+      if($add == 0) {
         Route::redirect('success','Data Berhasil Ditambah');
-      } else {
+      } else if($add == -5) {
         Route::redirect('failed','Data Gagal Ditambah',Route::selfPage());
       }
 

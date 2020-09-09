@@ -18,31 +18,19 @@ class Query {
     public function connect() {
         global $config;
 
-        $conn = array();
-        if($config['db_driver'] == 'mysql') {
-            $conn['connect'] = mysqli_connect("$config[db_host]","$config[db_user]","$config[db_pass]","$config[db_name]");
-            $conn['query'] = 'mysqli_';
-        } else if(($config['db_driver'] == 'postgres')) {
-            $conn['connect'] = pg_connect("host=$config[db_host] port=$config[db_port] dbname=$config[db_name] user=$config[db_user] password=$config[db_pass]");
-            $conn['query'] = 'pg_';
+        require_once($config['app_include']. 'adodb5/adodb.inc.php');
+
+        $conn = ADONewConnection($config['db_driver']);
+        if($config['db_driver'] == 'mysqli') {
+            $conn->Connect($config['db_host'],$config['db_user'],$config['db_pass'],$config['db_name']);
+        } else if($config['db_driver'] == 'postgres') {
+            $conn->Connect('host='.$config['db_host'].' port='.$config['db_port'].' dbname='.$config['db_name'].' user='.$config['db_user'].' password='.$config['db_pass']);
         }
         return $conn;
     }
 
     /**
-     * Fungsi Basic Query()
-     *
-     * @param $key = null
-     * @return $query
-     */
-    public function getQuery($key = null) {
-        $conn = self::connect();
-        $query = $conn['query']."query";
-        return $query($conn['connect'],$key);
-    }
-
-    /**
-     * Fungsi Menampilkan Seluruh Data Di Table
+     * Fungsi Mendapatkan Query Dasar Tabel
      *
      * @return $sql
      */
@@ -52,21 +40,14 @@ class Query {
     }
 
     /**
-     * Fungsi Menghitung Seluruh Data Di Table
+     * Fungsi Menampilkan Seluruh Data Array
      *
-     * @param $param = null
-     * @return $num_rows
+     * @return $sql
      */
-    public function countall($param = null) {
+    public static function getAll() {
         $conn = self::connect();
-        $string = $conn['query']."num_rows";
-
-        if($param != null) {
-            $num_rows = $string(self::all());
-        } else {
-            $num_rows = $string($param);
-        }
-        return $num_rows;
+        $row = $conn->getAll(self::baseQuery());
+        return $row;
     }
 
     /**
@@ -127,36 +108,12 @@ class Query {
      * @param $key = is_null(var)
      * @return $query
      */
-    public function recInsert($fillable, $key = null) {
-        $insert = 'INSERT INTO ' .static::getTable();
-        $insert .= " (";
-        for($j=0;$j<count($fillable);$j++) {
-            if($j==count($fillable)-1){
-                $insert .= "$fillable[$j]";
-            } else {
-                $insert .= "$fillable[$j]".',';
-            }
-        }
-        $insert .= ") VALUES ";
-        $insert .= "(";
-        for($i=0;$i<count($key);$i++) {
-            if($i==count($key)-1){
-                if($i==0) {
-                    $insert .= 'DEFAULT';
-                } else {
-                    $insert .= "'$key[$i]'";
-                }
-            } else {
-                if($i==0) {
-                    $insert .= 'DEFAULT'.',';
-                } else {
-                    $insert .= "'$key[$i]',";
-                }
-            }
-        }
-        $insert .= ")";
-        $query = self::getQuery($insert);
-        return $query;
+    public function recInsert($record) {
+        $conn = Query::connect();
+        $col = $conn->SelectLimit("select*from ".static::getTable(),1);
+        $sql = $conn->GetInsertSQL($col,$record);
+        $rs = $conn->Execute($sql);
+        return $conn->ErrorNo();
     }
 
     /**
@@ -220,15 +177,15 @@ class Query {
      * @param $param
      * @return $all = Array
      */
-    public static function getAll() {
-        $conn = self::connect();
-        $getQuery = self::getQuery(self::baseQuery());
-        $string = $conn['query']."fetch_array";
-        while($result = $string($getQuery)) {
-          $all[] = $result;
-        }
-        return @$all;
-    }
+    // public static function getAll() {
+    //     $conn = self::connect();
+    //     $getQuery = self::getQuery(self::baseQuery());
+    //     $string = $conn['query']."fetch_array";
+    //     while($result = $string($getQuery)) {
+    //       $all[] = $result;
+    //     }
+    //     return @$all;
+    // }
 
     /**
      * Fungsi Menampilkan Data Berupa Array Tapi Single Record

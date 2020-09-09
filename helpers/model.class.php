@@ -10,6 +10,11 @@ include('../config/autoload.php');
 
 class Model extends Query {
 
+
+    const table = null;
+    const schema = null;
+    const fillable = null;
+
     /**
      * Fungsi Memberi Schema Tabel
      *

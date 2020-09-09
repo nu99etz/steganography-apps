@@ -1,5 +1,7 @@
 <?php
 
-header("location:page/encrypt");
+define('__VALID_ENTRANCE', 1);
+
+header('location:auth/login');
 
 ?>

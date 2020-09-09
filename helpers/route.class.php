@@ -18,7 +18,7 @@ class Route {
     public static function getModelPath($name, $add = null){
         global $config;
 
-        return $config['app_models'] . 'm_' . strtolower($name) . '.php';
+        return $config['app_models'] . ucfirst($name) . 'Model.php';
     }
 
     /*
@@ -58,6 +58,21 @@ class Route {
     }
 
     /*
+    * Routing untuk menentukan view path yang dibutuhkan
+    * @$dir = string
+    * @$namefile = string
+    */
+    public static function getViewPath($view) {
+      global $config;
+
+      if(is_file('pages/'.$view.'.php')) {
+        return 'pages/'.$view.'.php';
+      } else if(!is_file($view)){
+        return '../assets/views/'.$view.'.php';
+      }
+    }
+
+    /*
     * Routing untuk mendapatkan alamat URL Statis
     * @return $destination, $destination_link
     */
@@ -74,24 +89,15 @@ class Route {
         }
     }
 
-    /*
-    * Routing untuk hapus record
-    * @$param = string
-    */
-    public static function Delete($param) {
-        return "delete/" . $param;
-    }
+    public static function getThisPage($view = null) {
+        global $page;
+        if(!empty($view)) {
+          $pages = $view;
+        } else {
+          $pages = $page;
+        }
 
-    public static function Edit($form,$param) {
-        return self::navAddress()."update/" . $param;
-    }
-
-    public static function View($form,$param) {
-        return self::navAddress()."detail/" . $param;
-    }
-
-    public static function Tambah() {
-        return self::navAddress();
+        return $pages;
     }
 
     public static function backToPage() {
@@ -131,20 +137,20 @@ class Route {
     */
     public static function getFlashData($data,$msg) {
       if($data == 'success') {
-        $_SESSION['FLASH'] = array(
+        $_SESSION['POS']['FLASH'] = array(
           'post_ok' => true,
           'color' => 'success',
           'msg' => $msg
         );
       } else if($data == 'failed') {
-        $_SESSION['FLASH'] = array(
+        $_SESSION['POS']['FLASH'] = array(
           'post_err' => true,
           'color' => 'danger',
           'msg' => $msg
         );
       }
-      $flash = $_SESSION['FLASH'];
-      unset($_SESSION['FLASH']);
+      $flash = $_SESSION['POS']['FLASH'];
+      unset($_SESSION['POS']['FLASH']);
       return $flash;
     }
 
@@ -154,12 +160,12 @@ class Route {
     */
     public static function setFlashData($flash) {
 
-      $_SESSION['FLASH'] = $flash;
+      $_SESSION['POS']['FLASH'] = $flash;
 
     }
     /*
     * Routing untuk mendirect halaman
-    * @$url = string (optional)
+    * @param $url = string (optional)
     * @$status = string (optional)
     * @$messages = string(optional)
     */
@@ -168,7 +174,7 @@ class Route {
       if(!empty($url)) {
         $url = $url;
       } else {
-        $url = self::backToPage();
+        $url = self::getThisPage();
       }
       if(!empty($status) || !empty($messages)) {
         $set_flash = self::getFlashData($status,$messages);

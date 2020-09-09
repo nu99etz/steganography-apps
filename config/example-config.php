@@ -34,11 +34,12 @@
         $config['db_pass'] = 'sapi';
         $config['db_name'] = 'arisan';
 
-        // Directori
+        // Directory
         $config['app_root'] = 'C:/xampp/htdocs';
         $config['app_path'] = '/arisan';
         $config['app_asset'] = $config['app_path'].'/assets/';
         $config['app_helper'] = '../helpers/';
         $config['app_models'] = '../models/';
-        $config['app_uploads'] = $config['app_path'].'/upload/';
+        $config['app_upload'] = $config['app_path'].'/upload/';
+        $config['app_include'] = $config['app_path'].'/include/';
 ?>

@@ -2,19 +2,19 @@
 
 class Check {
 
-    public static function debug_array($key) {
+    public static function debug($key) {
         if(is_array($key)){
             echo "<pre>";
             print_r($key);
             echo"</pre>";
         } else {
-            echo $key;
+            var_dump($key);
         }
         die();
     }
 
-
-    public static function debug_dump($key) {
-        return var_dump($key);
+    public static function json($json) {
+      echo json_encode($json);
+      die();
     }
 }
